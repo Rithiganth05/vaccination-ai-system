@@ -1,0 +1,390 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #f4f7fb;
+  color: #1f2937;
+}
+
+button,
+input,
+select {
+  font-family: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+/* Login / Register */
+
+.login-container {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: linear-gradient(135deg, #e0f2fe, #f8fafc);
+}
+
+.login-box {
+  width: 400px;
+  padding: 35px;
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+}
+
+.login-box h1 {
+  text-align: center;
+  color: #2563eb;
+  margin-bottom: 8px;
+}
+
+.login-box h2 {
+  text-align: center;
+  margin-bottom: 25px;
+}
+
+.login-box form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.login-box input,
+.login-box select {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 15px;
+}
+
+.login-box input:focus,
+.login-box select:focus {
+  outline: none;
+  border-color: #2563eb;
+}
+
+.login-box button {
+  padding: 12px;
+  border: none;
+  border-radius: 8px;
+  background: #2563eb;
+  color: white;
+  font-size: 15px;
+}
+
+.login-box button:hover {
+  background: #1d4ed8;
+}
+
+.login-box p {
+  text-align: center;
+  margin-top: 20px;
+}
+
+/* Dashboard */
+
+.dashboard {
+  max-width: 1250px;
+  margin: auto;
+  padding: 30px;
+}
+
+.dashboard > h1 {
+  display: inline-block;
+  color: #1e3a8a;
+  margin-bottom: 10px;
+}
+
+.dashboard > button {
+  float: right;
+  padding: 10px 18px;
+  border: none;
+  border-radius: 8px;
+  background: #dc2626;
+  color: white;
+  font-weight: bold;
+}
+
+.dashboard > button:hover {
+  background: #b91c1c;
+}
+
+.dashboard > h2 {
+  clear: both;
+  margin-top: 25px;
+  color: #374151;
+}
+
+/* User Information */
+
+.user-info {
+  background: white;
+  padding: 25px;
+  margin: 20px 0;
+  border-radius: 14px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.06);
+}
+
+.user-info h2 {
+  margin-top: 0;
+  color: #2563eb;
+}
+
+.user-info p {
+  margin: 8px 0;
+}
+
+/* Summary */
+
+.summary {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 15px;
+  margin: 25px 0;
+}
+
+.card {
+  background: white;
+  padding: 20px;
+  border-radius: 14px;
+  text-align: center;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.06);
+}
+
+.card h3 {
+  margin: 0;
+  color: #6b7280;
+  font-size: 15px;
+}
+
+.card p {
+  margin: 12px 0 0;
+  font-size: 30px;
+  font-weight: bold;
+  color: #2563eb;
+}
+
+/* Prediction */
+
+.prediction {
+  background: white;
+  padding: 25px;
+  margin: 25px 0;
+  border-radius: 14px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.06);
+}
+
+.prediction h2 {
+  margin-top: 0;
+  color: #2563eb;
+}
+
+.prediction > button {
+  padding: 11px 18px;
+  border: none;
+  border-radius: 8px;
+  background: #7c3aed;
+  color: white;
+  font-weight: bold;
+}
+
+.prediction > button:hover {
+  background: #6d28d9;
+}
+
+.prediction-card {
+  margin-top: 20px;
+  padding: 20px;
+  background: #f8fafc;
+  border-radius: 12px;
+}
+
+.risk-bar {
+  width: 100%;
+  height: 14px;
+  background: #e5e7eb;
+  border-radius: 10px;
+  overflow: hidden;
+  margin: 15px 0;
+}
+
+.risk-progress {
+  height: 100%;
+  background: #7c3aed;
+  border-radius: 10px;
+  transition: width 0.5s ease;
+}
+
+/* Vaccination Records */
+
+.records {
+  background: white;
+  padding: 25px;
+  margin: 25px 0;
+  border-radius: 14px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.06);
+}
+
+.records h2 {
+  margin-top: 0;
+  color: #2563eb;
+}
+
+.records > button {
+  padding: 11px 18px;
+  border: none;
+  border-radius: 8px;
+  background: #059669;
+  color: white;
+  font-weight: bold;
+  margin-bottom: 20px;
+}
+
+.records > button:hover {
+  background: #047857;
+}
+
+.records form {
+  background: #f8fafc;
+  padding: 20px;
+  border-radius: 12px;
+  margin-bottom: 25px;
+}
+
+.records form h3 {
+  margin-top: 0;
+}
+
+.records form input,
+.records form select {
+  padding: 10px;
+  margin: 5px 0 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 7px;
+}
+
+.records form button {
+  padding: 10px 15px;
+  border: none;
+  border-radius: 7px;
+  background: #2563eb;
+  color: white;
+  margin-right: 8px;
+}
+
+/* Table */
+
+.records table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 15px;
+}
+
+.records th {
+  background: #eff6ff;
+  color: #1e3a8a;
+  padding: 13px;
+  text-align: left;
+}
+
+.records td {
+  padding: 13px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.records tr:hover {
+  background: #f9fafb;
+}
+
+.records td button {
+  padding: 7px 11px;
+  border: none;
+  border-radius: 6px;
+  margin-right: 6px;
+  background: #2563eb;
+  color: white;
+}
+
+.records td button:last-child {
+  background: #dc2626;
+}
+
+/* Reminders */
+
+.reminders {
+  background: white;
+  padding: 25px;
+  margin: 25px 0;
+  border-radius: 14px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.06);
+}
+
+.reminders h2 {
+  margin-top: 0;
+  color: #2563eb;
+}
+
+.reminder {
+  padding: 18px;
+  margin-top: 12px;
+  border-radius: 10px;
+  background: #fffbeb;
+  border-left: 5px solid #f59e0b;
+}
+
+.reminder h3 {
+  margin-top: 0;
+}
+
+.reminder p {
+  margin: 7px 0;
+}
+
+/* Responsive */
+
+@media (max-width: 900px) {
+  .summary {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .dashboard {
+    padding: 20px;
+  }
+
+  .records {
+    overflow-x: auto;
+  }
+
+  .records table {
+    min-width: 800px;
+  }
+}
+
+@media (max-width: 600px) {
+  .login-box {
+    width: 90%;
+    padding: 25px;
+  }
+
+  .summary {
+    grid-template-columns: 1fr;
+  }
+
+  .dashboard {
+    padding: 15px;
+  }
+
+  .dashboard > h1 {
+    font-size: 24px;
+  }
+
+  .dashboard > button {
+    padding: 8px 12px;
+  }
+}
