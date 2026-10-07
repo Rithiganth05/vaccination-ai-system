@@ -1,20 +1,13 @@
 import { useState } from "react";
 
-function App() {
-  // =========================
-  // LOGIN STATES
-  // =========================
+const API = "http://127.0.0.1:8001";
 
+function App() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [userId, setUserId] = useState(null);
 
-  // =========================
-  // REGISTER STATES
-  // =========================
-
   const [showRegister, setShowRegister] = useState(false);
-
   const [registerUsername, setRegisterUsername] = useState("");
   const [registerPassword, setRegisterPassword] = useState("");
   const [registerName, setRegisterName] = useState("");
@@ -22,162 +15,78 @@ function App() {
   const [registerGender, setRegisterGender] = useState("");
   const [registerContact, setRegisterContact] = useState("");
 
-  // =========================
-  // DASHBOARD STATES
-  // =========================
-
   const [dashboard, setDashboard] = useState(null);
   const [records, setRecords] = useState([]);
   const [vaccines, setVaccines] = useState([]);
 
-  // =========================
-  // ADD RECORD STATES
-  // =========================
-
   const [showAddRecord, setShowAddRecord] = useState(false);
-
   const [recordVaccineId, setRecordVaccineId] = useState("");
   const [recordDoseNumber, setRecordDoseNumber] = useState("");
   const [recordVaccinationDate, setRecordVaccinationDate] = useState("");
   const [recordNextDueDate, setRecordNextDueDate] = useState("");
   const [recordStatus, setRecordStatus] = useState("");
 
-  // =========================
-  // EDIT RECORD STATES
-  // =========================
-
   const [editingRecordId, setEditingRecordId] = useState(null);
-
   const [editVaccineId, setEditVaccineId] = useState("");
   const [editDoseNumber, setEditDoseNumber] = useState("");
   const [editVaccinationDate, setEditVaccinationDate] = useState("");
   const [editNextDueDate, setEditNextDueDate] = useState("");
   const [editStatus, setEditStatus] = useState("");
 
-  // =========================================================
-  // GET DASHBOARD
-  // =========================================================
-
-  const getDashboard = async (loggedInUserId) => {
+  const api = async (url, options = {}) => {
     const token = localStorage.getItem("access_token");
 
     if (!token) {
-      console.log("No token found");
-      return;
+      alert("Please login again");
+      throw new Error("No authentication token");
     }
 
+    const response = await fetch(`${API}${url}`, {
+      ...options,
+      headers: {
+        Authorization: `Bearer ${token}`,
+        ...options.headers,
+      },
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.detail || "Request failed");
+    }
+
+    return data;
+  };
+
+  // Get dashboard
+  const getDashboard = async (id) => {
     try {
-      const response = await fetch(
-        `http://127.0.0.1:8001/dashboard/${loggedInUserId}`,
-        {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      const data = await response.json();
-
-      console.log("Dashboard response:", data);
-
-      if (response.ok) {
-        setDashboard(data);
-      } else {
-        console.error("Dashboard error:", data);
-      }
+      setDashboard(await api(`/dashboard/${id}`));
     } catch (error) {
       console.error("Dashboard error:", error);
     }
   };
 
-  // =========================================================
-  // GET VACCINATION RECORDS
-  // =========================================================
-
+  // Get vaccination records
   const getVaccinationRecords = async () => {
-    const token = localStorage.getItem("access_token");
-
-    if (!token) {
-      console.log("No token found");
-      return;
-    }
-
     try {
-      const response = await fetch(
-        "http://127.0.0.1:8001/vaccination-records",
-        {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      const data = await response.json();
-
-      console.log("Vaccination records:", data);
-
-      if (response.ok) {
-        setRecords(data);
-      } else {
-        console.error("Records error:", data);
-      }
+      setRecords(await api("/vaccination-records"));
     } catch (error) {
       console.error("Records error:", error);
     }
   };
 
-  // =========================================================
-  // GET VACCINES
-  // =========================================================
-
+  // Get vaccines
   const getVaccines = async () => {
-    const token = localStorage.getItem("access_token");
-
-    if (!token) {
-      console.log("No token found");
-      return;
-    }
-
     try {
-      const response = await fetch(
-        "http://127.0.0.1:8001/vaccines",
-        {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      const data = await response.json();
-
-      console.log("Vaccines:", data);
-
-      if (response.ok) {
-        setVaccines(data);
-      } else {
-        console.error("Vaccine error:", data);
-      }
+      setVaccines(await api("/vaccines"));
     } catch (error) {
       console.error("Vaccine error:", error);
     }
   };
 
-  // =========================================================
-  // ADD VACCINATION RECORD
-  // =========================================================
-
   const handleAddRecord = async (e) => {
     e.preventDefault();
-
-    const token = localStorage.getItem("access_token");
-
-    if (!token) {
-      alert("Please login again");
-      return;
-    }
 
     if (!userId) {
       alert("User ID not found. Please login again.");
@@ -193,70 +102,45 @@ function App() {
       status: recordStatus,
     };
 
-    console.log("Sending vaccination record:", recordData);
-
     try {
-      const response = await fetch(
-        "http://127.0.0.1:8001/vaccination-records",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify(recordData),
-        }
-      );
+      await api("/vaccination-records", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(recordData),
+      });
 
-      const data = await response.json();
+      alert("Vaccination record added successfully");
 
-      console.log("Add record response:", data);
+      setRecordVaccineId("");
+      setRecordDoseNumber("");
+      setRecordVaccinationDate("");
+      setRecordNextDueDate("");
+      setRecordStatus("");
+      setShowAddRecord(false);
 
-      if (response.ok) {
-        alert("Vaccination record added successfully");
-
-        setRecordVaccineId("");
-        setRecordDoseNumber("");
-        setRecordVaccinationDate("");
-        setRecordNextDueDate("");
-        setRecordStatus("");
-
-        setShowAddRecord(false);
-
-        await getVaccinationRecords();
-        await getDashboard(userId);
-      } else {
-        alert(data.detail || "Failed to add vaccination record");
-      }
+      await getVaccinationRecords();
+      await getDashboard(userId);
     } catch (error) {
-      console.error("Add record error:", error);
-      alert("Unable to connect to server");
+      alert(error.message);
     }
   };
 
-  // =========================================================
-  // START EDIT RECORD
-  // =========================================================
-
+  // Start editing
   const startEditRecord = (record) => {
     setEditingRecordId(record.record_id);
-
     setEditVaccineId(String(record.vaccine_id));
     setEditDoseNumber(String(record.dose_number));
     setEditVaccinationDate(record.vaccination_date);
     setEditNextDueDate(record.next_due_date || "");
     setEditStatus(record.status);
-
     setShowAddRecord(false);
   };
 
-  // =========================================================
-  // CANCEL EDIT
-  // =========================================================
-
+  // Cancel editing
   const cancelEditRecord = () => {
     setEditingRecordId(null);
-
     setEditVaccineId("");
     setEditDoseNumber("");
     setEditVaccinationDate("");
@@ -264,27 +148,12 @@ function App() {
     setEditStatus("");
   };
 
-  // =========================================================
-  // EDIT VACCINATION RECORD
-  // =========================================================
-
+  // Update vaccination record
   const handleEditRecord = async (e) => {
     e.preventDefault();
 
-    const token = localStorage.getItem("access_token");
-
-    if (!token) {
-      alert("Please login again");
-      return;
-    }
-
-    if (editingRecordId === null) {
-      alert("No record selected for editing");
-      return;
-    }
-
-    if (!userId) {
-      alert("User ID not found. Please login again.");
+    if (!userId || editingRecordId === null) {
+      alert("Please select a valid record.");
       return;
     }
 
@@ -297,147 +166,79 @@ function App() {
       status: editStatus,
     };
 
-    console.log("Updating vaccination record:", recordData);
-
     try {
-      const response = await fetch(
-        `http://127.0.0.1:8001/vaccination-records/${editingRecordId}`,
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify(recordData),
-        }
-      );
+      await api(`/vaccination-records/${editingRecordId}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(recordData),
+      });
 
-      const data = await response.json();
+      alert("Vaccination record updated successfully");
 
-      console.log("Edit record response:", data);
-
-      if (response.ok) {
-        alert("Vaccination record updated successfully");
-
-        cancelEditRecord();
-
-        await getVaccinationRecords();
-        await getDashboard(userId);
-      } else {
-        alert(data.detail || "Failed to update record");
-      }
+      cancelEditRecord();
+      await getVaccinationRecords();
+      await getDashboard(userId);
     } catch (error) {
-      console.error("Edit record error:", error);
-      alert("Unable to connect to server");
+      alert(error.message);
     }
   };
 
-  // =========================================================
-  // DELETE RECORD
-  // =========================================================
-
+  // Delete vaccination record
   const handleDeleteRecord = async (recordId) => {
-    const token = localStorage.getItem("access_token");
-
-    if (!token) {
-      alert("Please login again");
-      return;
-    }
-
-    const confirmDelete = window.confirm(
-      "Are you sure you want to delete this vaccination record?"
-    );
-
-    if (!confirmDelete) {
+    if (
+      !window.confirm(
+        "Are you sure you want to delete this vaccination record?"
+      )
+    ) {
       return;
     }
 
     try {
-      const response = await fetch(
-        `http://127.0.0.1:8001/vaccination-records/${recordId}`,
-        {
-          method: "DELETE",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      await api(`/vaccination-records/${recordId}`, {
+        method: "DELETE",
+      });
 
-      const data = await response.json();
+      alert("Vaccination record deleted successfully");
 
-      console.log("Delete record response:", data);
-
-      if (response.ok) {
-        alert("Vaccination record deleted successfully");
-
-        if (editingRecordId === recordId) {
-          cancelEditRecord();
-        }
-
-        await getVaccinationRecords();
-        await getDashboard(userId);
-      } else {
-        alert(data.detail || "Failed to delete record");
+      if (editingRecordId === recordId) {
+        cancelEditRecord();
       }
+
+      await getVaccinationRecords();
+      await getDashboard(userId);
     } catch (error) {
-      console.error("Delete record error:", error);
-      alert("Unable to connect to server");
+      alert(error.message);
     }
   };
 
-  // =========================================================
-  // GENERATE AI PREDICTION
-  // =========================================================
-
+  // Generate AI prediction
   const handleGeneratePrediction = async () => {
-    const token = localStorage.getItem("access_token");
-
-    if (!token) {
-      alert("Please login again");
-      return;
-    }
-
     if (!userId) {
       alert("User ID not found. Please login again.");
       return;
     }
 
     try {
-      const response = await fetch(
-        "http://127.0.0.1:8001/predictions",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({
-            user_id: userId,
-          }),
-        }
-      );
+      await api("/predictions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          user_id: userId,
+        }),
+      });
 
-      const data = await response.json();
-
-      console.log("Prediction response:", data);
-
-      if (response.ok) {
-        alert("AI prediction generated successfully");
-
-        await getDashboard(userId);
-      } else {
-        alert(data.detail || "Failed to generate AI prediction");
-      }
+      alert("AI prediction generated successfully");
+      await getDashboard(userId);
     } catch (error) {
-      console.error("Prediction error:", error);
-      alert("Unable to connect to server");
+      alert(error.message);
     }
   };
 
-  // =========================================================
-  // REGISTER
-  // =========================================================
-
+  // Register
   const handleRegister = async (e) => {
     e.preventDefault();
 
@@ -446,105 +247,78 @@ function App() {
       password: registerPassword,
       name: registerName.trim(),
       date_of_birth: registerDob,
-      gender: registerGender.trim(),
+      gender: registerGender,
       contact: registerContact.trim(),
     };
 
-    console.log("Registration data:", registerData);
-
     try {
-      const response = await fetch(
-        "http://127.0.0.1:8001/auth/register",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(registerData),
-        }
-      );
+      const response = await fetch(`${API}/auth/register`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(registerData),
+      });
 
       const data = await response.json();
 
-      console.log("Registration response:", data);
-
-      if (response.ok) {
-        alert("Registration successful. Please login.");
-
-        setShowRegister(false);
-
-        setRegisterUsername("");
-        setRegisterPassword("");
-        setRegisterName("");
-        setRegisterDob("");
-        setRegisterGender("");
-        setRegisterContact("");
-
-        setUsername(registerData.username);
-      } else {
-        alert(data.detail || "Registration failed");
+      if (!response.ok) {
+        throw new Error(data.detail || "Registration failed");
       }
+
+      alert("Registration successful. Please login.");
+
+      setShowRegister(false);
+      setUsername(registerData.username);
+
+      setRegisterUsername("");
+      setRegisterPassword("");
+      setRegisterName("");
+      setRegisterDob("");
+      setRegisterGender("");
+      setRegisterContact("");
     } catch (error) {
-      console.error("Registration error:", error);
-      alert("Unable to connect to server");
+      alert(error.message);
     }
   };
 
-  // =========================================================
-  // LOGIN
-  // =========================================================
-
+  // Login
   const handleLogin = async (e) => {
     e.preventDefault();
 
     const formData = new URLSearchParams();
-
     formData.append("username", username.trim());
     formData.append("password", password);
 
     try {
-      const response = await fetch(
-        "http://127.0.0.1:8001/auth/login",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/x-www-form-urlencoded",
-          },
-          body: formData,
-        }
-      );
+      const response = await fetch(`${API}/auth/login`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+        body: formData,
+      });
 
       const data = await response.json();
 
-      console.log("Login response:", data);
-      console.log("Logged in user ID:", data.user_id);
-
-      if (response.ok) {
-        localStorage.setItem(
-          "access_token",
-          data.access_token
-        );
-
-        setUserId(data.user_id);
-
-        alert("Login successful");
-
-        await getDashboard(data.user_id);
-        await getVaccinationRecords();
-        await getVaccines();
-      } else {
-        alert(data.detail || "Login failed");
+      if (!response.ok) {
+        throw new Error(data.detail || "Login failed");
       }
+
+      localStorage.setItem("access_token", data.access_token);
+      setUserId(data.user_id);
+
+      alert("Login successful");
+
+      await getDashboard(data.user_id);
+      await getVaccinationRecords();
+      await getVaccines();
     } catch (error) {
-      console.error("Login error:", error);
-      alert("Unable to connect to server");
+      alert(error.message);
     }
   };
 
-  // =========================================================
-  // LOGOUT
-  // =========================================================
-
+  // Logout
   const handleLogout = () => {
     localStorage.removeItem("access_token");
 
@@ -567,39 +341,22 @@ function App() {
     cancelEditRecord();
   };
 
-  // =========================================================
-  // UI
-  // =========================================================
-
   return (
     <div className="app">
-
-      {/* =====================================================
-          LOGIN / REGISTER PAGE
-      ===================================================== */}
-
       {!dashboard ? (
-
         <div className="login-container">
-
           <div className="login-box">
-
             {!showRegister ? (
-
               <>
                 <h1>Vaccination AI System</h1>
-
                 <h2>Login</h2>
 
                 <form onSubmit={handleLogin}>
-
                   <input
                     type="text"
                     placeholder="Username"
                     value={username}
-                    onChange={(e) =>
-                      setUsername(e.target.value)
-                    }
+                    onChange={(e) => setUsername(e.target.value)}
                     required
                   />
 
@@ -607,41 +364,29 @@ function App() {
                     type="password"
                     placeholder="Password"
                     value={password}
-                    onChange={(e) =>
-                      setPassword(e.target.value)
-                    }
+                    onChange={(e) => setPassword(e.target.value)}
                     required
                   />
 
-                  <button type="submit">
-                    Login
-                  </button>
-
+                  <button type="submit">Login</button>
                 </form>
 
                 <p>
                   New user?{" "}
-
                   <button
                     type="button"
-                    onClick={() =>
-                      setShowRegister(true)
-                    }
+                    onClick={() => setShowRegister(true)}
                   >
                     Register
                   </button>
                 </p>
               </>
-
             ) : (
-
               <>
                 <h1>Vaccination AI System</h1>
-
                 <h2>Register</h2>
 
                 <form onSubmit={handleRegister}>
-
                   <input
                     type="text"
                     placeholder="Username"
@@ -688,21 +433,10 @@ function App() {
                     }
                     required
                   >
-                    <option value="">
-                      Select Gender
-                    </option>
-
-                    <option value="Male">
-                      Male
-                    </option>
-
-                    <option value="Female">
-                      Female
-                    </option>
-
-                    <option value="Other">
-                      Other
-                    </option>
+                    <option value="">Select Gender</option>
+                    <option value="Male">Male</option>
+                    <option value="Female">Female</option>
+                    <option value="Other">Other</option>
                   </select>
 
                   <input
@@ -715,56 +449,31 @@ function App() {
                     required
                   />
 
-                  <button type="submit">
-                    Register
-                  </button>
-
+                  <button type="submit">Register</button>
                 </form>
 
                 <p>
                   Already have an account?{" "}
-
                   <button
                     type="button"
-                    onClick={() =>
-                      setShowRegister(false)
-                    }
+                    onClick={() => setShowRegister(false)}
                   >
                     Login
                   </button>
                 </p>
               </>
-
             )}
-
           </div>
-
         </div>
-
       ) : (
-
-        // =====================================================
-        // DASHBOARD
-        // =====================================================
-
         <div className="dashboard">
-
           <h1>Vaccination Dashboard</h1>
 
-          <button onClick={handleLogout}>
-            Logout
-          </button>
+          <button onClick={handleLogout}>Logout</button>
 
-          <h2>
-            Welcome, {dashboard.user.name}
-          </h2>
-
-          {/* =================================================
-              USER INFORMATION
-          ================================================= */}
+          <h2>Welcome, {dashboard.user.name}</h2>
 
           <div className="user-info">
-
             <h2>User Information</h2>
 
             <p>
@@ -791,18 +500,11 @@ function App() {
               <strong>Contact:</strong>{" "}
               {dashboard.user.contact}
             </p>
-
           </div>
 
-          {/* =================================================
-              SUMMARY
-          ================================================= */}
-
           <div className="summary">
-
             <div className="card">
               <h3>Total Records</h3>
-
               <p>
                 {dashboard.vaccination_summary.total_records}
               </p>
@@ -810,7 +512,6 @@ function App() {
 
             <div className="card">
               <h3>Completed</h3>
-
               <p>
                 {dashboard.vaccination_summary.completed}
               </p>
@@ -818,7 +519,6 @@ function App() {
 
             <div className="card">
               <h3>Missed</h3>
-
               <p>
                 {dashboard.vaccination_summary.missed}
               </p>
@@ -826,7 +526,6 @@ function App() {
 
             <div className="card">
               <h3>Upcoming</h3>
-
               <p>
                 {dashboard.vaccination_summary.upcoming}
               </p>
@@ -834,20 +533,13 @@ function App() {
 
             <div className="card">
               <h3>Overdue</h3>
-
               <p>
                 {dashboard.vaccination_summary.overdue}
               </p>
             </div>
-
           </div>
 
-          {/* =================================================
-              AI PREDICTION
-          ================================================= */}
-
           <div className="prediction">
-
             <h2>AI Risk Prediction</h2>
 
             <button
@@ -858,9 +550,7 @@ function App() {
             </button>
 
             {dashboard.latest_prediction ? (
-
               <div className="prediction-card">
-
                 <p>
                   <strong>Risk Level:</strong>{" "}
                   {dashboard.latest_prediction.risk_level}
@@ -872,7 +562,6 @@ function App() {
                 </p>
 
                 <div className="risk-bar">
-
                   <div
                     className="risk-progress"
                     style={{
@@ -885,9 +574,7 @@ function App() {
                         100
                       )}%`,
                     }}
-                  >
-                  </div>
-
+                  />
                 </div>
 
                 <p>
@@ -896,34 +583,21 @@ function App() {
                     dashboard.latest_prediction.prediction_date
                   ).toLocaleString()}
                 </p>
-
               </div>
-
             ) : (
-
               <p>
-                No prediction available. Click
-                "Generate AI Prediction" to create one.
+                No prediction available. Click "Generate AI
+                Prediction" to create one.
               </p>
-
             )}
-
           </div>
 
-          {/* =================================================
-              VACCINATION RECORDS
-          ================================================= */}
-
           <div className="records">
-
             <h2>Vaccination Records</h2>
-
-            {/* ADD RECORD BUTTON */}
 
             <button
               type="button"
               onClick={() => {
-
                 if (editingRecordId !== null) {
                   cancelEditRecord();
                 }
@@ -936,21 +610,11 @@ function App() {
                 : "Add Vaccination Record"}
             </button>
 
-            {/* =================================================
-                ADD RECORD FORM
-            ================================================= */}
-
             {showAddRecord && (
-
               <form onSubmit={handleAddRecord}>
+                <h3>Add Vaccination Record</h3>
 
-                <h3>
-                  Add Vaccination Record
-                </h3>
-
-                <label>
-                  Vaccine:
-                </label>
+                <label>Vaccine:</label>
 
                 <select
                   value={recordVaccineId}
@@ -959,29 +623,21 @@ function App() {
                   }
                   required
                 >
-
-                  <option value="">
-                    Select Vaccine
-                  </option>
+                  <option value="">Select Vaccine</option>
 
                   {vaccines.map((vaccine) => (
-
                     <option
                       key={vaccine.vaccine_id}
                       value={vaccine.vaccine_id}
                     >
                       {vaccine.vaccine_name}
                     </option>
-
                   ))}
-
                 </select>
 
                 <br />
 
-                <label>
-                  Dose Number:
-                </label>
+                <label>Dose Number:</label>
 
                 <input
                   type="number"
@@ -995,9 +651,7 @@ function App() {
 
                 <br />
 
-                <label>
-                  Vaccination Date:
-                </label>
+                <label>Vaccination Date:</label>
 
                 <input
                   type="date"
@@ -1010,9 +664,7 @@ function App() {
 
                 <br />
 
-                <label>
-                  Next Due Date:
-                </label>
+                <label>Next Due Date:</label>
 
                 <input
                   type="date"
@@ -1024,9 +676,7 @@ function App() {
 
                 <br />
 
-                <label>
-                  Status:
-                </label>
+                <label>Status:</label>
 
                 <select
                   value={recordStatus}
@@ -1035,19 +685,13 @@ function App() {
                   }
                   required
                 >
-
-                  <option value="">
-                    Select Status
-                  </option>
-
+                  <option value="">Select Status</option>
                   <option value="Completed">
                     Completed
                   </option>
-
                   <option value="Missed">
                     Missed
                   </option>
-
                 </select>
 
                 <br />
@@ -1055,31 +699,19 @@ function App() {
                 <button type="submit">
                   Save Vaccination Record
                 </button>
-
               </form>
-
             )}
 
-            {/* =================================================
-                EDIT RECORD FORM
-            ================================================= */}
-
             {editingRecordId !== null && (
-
               <form onSubmit={handleEditRecord}>
-
-                <h3>
-                  Edit Vaccination Record
-                </h3>
+                <h3>Edit Vaccination Record</h3>
 
                 <p>
                   Editing Record ID:{" "}
                   <strong>{editingRecordId}</strong>
                 </p>
 
-                <label>
-                  Vaccine:
-                </label>
+                <label>Vaccine:</label>
 
                 <select
                   value={editVaccineId}
@@ -1088,29 +720,21 @@ function App() {
                   }
                   required
                 >
-
-                  <option value="">
-                    Select Vaccine
-                  </option>
+                  <option value="">Select Vaccine</option>
 
                   {vaccines.map((vaccine) => (
-
                     <option
                       key={vaccine.vaccine_id}
                       value={vaccine.vaccine_id}
                     >
                       {vaccine.vaccine_name}
                     </option>
-
                   ))}
-
                 </select>
 
                 <br />
 
-                <label>
-                  Dose Number:
-                </label>
+                <label>Dose Number:</label>
 
                 <input
                   type="number"
@@ -1124,9 +748,7 @@ function App() {
 
                 <br />
 
-                <label>
-                  Vaccination Date:
-                </label>
+                <label>Vaccination Date:</label>
 
                 <input
                   type="date"
@@ -1139,9 +761,7 @@ function App() {
 
                 <br />
 
-                <label>
-                  Next Due Date:
-                </label>
+                <label>Next Due Date:</label>
 
                 <input
                   type="date"
@@ -1153,9 +773,7 @@ function App() {
 
                 <br />
 
-                <label>
-                  Status:
-                </label>
+                <label>Status:</label>
 
                 <select
                   value={editStatus}
@@ -1164,19 +782,13 @@ function App() {
                   }
                   required
                 >
-
-                  <option value="">
-                    Select Status
-                  </option>
-
+                  <option value="">Select Status</option>
                   <option value="Completed">
                     Completed
                   </option>
-
                   <option value="Missed">
                     Missed
                   </option>
-
                 </select>
 
                 <br />
@@ -1191,182 +803,117 @@ function App() {
                 >
                   Cancel
                 </button>
-
               </form>
-
             )}
 
-            {/* =================================================
-                RECORDS TABLE
-            ================================================= */}
-
             {records.length === 0 ? (
-
-              <p>
-                No vaccination records found.
-              </p>
-
+              <p>No vaccination records found.</p>
             ) : (
-
               <table>
-
                 <thead>
-
                   <tr>
-
                     <th>Record ID</th>
-
                     <th>Vaccine</th>
-
                     <th>Dose</th>
-
                     <th>Vaccination Date</th>
-
                     <th>Next Due Date</th>
-
                     <th>Status</th>
-
                     <th>Actions</th>
-
                   </tr>
-
                 </thead>
 
                 <tbody>
+                  {records.map((record) => {
+                    const vaccine = vaccines.find(
+                      (v) =>
+                        v.vaccine_id === record.vaccine_id
+                    );
 
-                  {records.map((record) => (
+                    return (
+                      <tr key={record.record_id}>
+                        <td>{record.record_id}</td>
 
-                    <tr
-                      key={record.record_id}
-                    >
+                        <td>
+                          {vaccine?.vaccine_name || "Unknown"}
+                        </td>
 
-                      <td>
-                        {record.record_id}
-                      </td>
+                        <td>{record.dose_number}</td>
 
-                      <td>
+                        <td>
+                          {record.vaccination_date}
+                        </td>
 
-                        {vaccines.find(
-                          (vaccine) =>
-                            vaccine.vaccine_id ===
-                            record.vaccine_id
-                        )?.vaccine_name ||
-                          "Unknown"}
+                        <td>
+                          {record.next_due_date || "-"}
+                        </td>
 
-                      </td>
+                        <td>{record.status}</td>
 
-                      <td>
-                        {record.dose_number}
-                      </td>
+                        <td>
+                          <button
+                            type="button"
+                            onClick={() =>
+                              startEditRecord(record)
+                            }
+                          >
+                            Edit
+                          </button>
 
-                      <td>
-                        {record.vaccination_date}
-                      </td>
-
-                      <td>
-                        {record.next_due_date || "-"}
-                      </td>
-
-                      <td>
-                        {record.status}
-                      </td>
-
-                      <td>
-
-                        <button
-                          type="button"
-                          onClick={() =>
-                            startEditRecord(record)
-                          }
-                        >
-                          Edit
-                        </button>
-
-                        <button
-                          type="button"
-                          onClick={() =>
-                            handleDeleteRecord(
-                              record.record_id
-                            )
-                          }
-                        >
-                          Delete
-                        </button>
-
-                      </td>
-
-                    </tr>
-
-                  ))}
-
+                          <button
+                            type="button"
+                            onClick={() =>
+                              handleDeleteRecord(
+                                record.record_id
+                              )
+                            }
+                          >
+                            Delete
+                          </button>
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
-
               </table>
-
             )}
-
           </div>
-
-          {/* =================================================
-              REMINDERS
-          ================================================= */}
 
           <div className="reminders">
+            <h2>Vaccination Reminders</h2>
 
-            <h2>
-              Vaccination Reminders
-            </h2>
-
-            {!dashboard.reminders ||
-            dashboard.reminders.length === 0 ? (
-
-              <p>
-                No vaccination reminders.
-              </p>
-
+            {!dashboard.reminders?.length ? (
+              <p>No vaccination reminders.</p>
             ) : (
+              dashboard.reminders.map((reminder) => (
+                <div
+                  className="reminder"
+                  key={reminder.record_id}
+                >
+                  <h3>
+                    {reminder.vaccine_name ||
+                      "Unknown Vaccine"}
+                  </h3>
 
-              dashboard.reminders.map(
-                (reminder) => (
+                  <p>
+                    <strong>Dose:</strong>{" "}
+                    {reminder.dose_number}
+                  </p>
 
-                  <div
-                    className="reminder"
-                    key={reminder.record_id}
-                  >
+                  <p>
+                    <strong>Due Date:</strong>{" "}
+                    {reminder.next_due_date}
+                  </p>
 
-                    <h3>
-                      {reminder.vaccine_name ||
-                        "Unknown Vaccine"}
-                    </h3>
-
-                    <p>
-                      <strong>Dose:</strong>{" "}
-                      {reminder.dose_number}
-                    </p>
-
-                    <p>
-                      <strong>Due Date:</strong>{" "}
-                      {reminder.next_due_date}
-                    </p>
-
-                    <p>
-                      <strong>Status:</strong>{" "}
-                      {reminder.status}
-                    </p>
-
-                  </div>
-
-                )
-              )
-
+                  <p>
+                    <strong>Status:</strong>{" "}
+                    {reminder.status}
+                  </p>
+                </div>
+              ))
             )}
-
           </div>
-
         </div>
-
       )}
-
     </div>
   );
 }
